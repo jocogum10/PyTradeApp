@@ -10,9 +10,10 @@ import tkinter
 class MainGUI:
     def __init__(self):
         self.root = tkinter.Tk()
-        self.root.title("Trading")
+        self.root.title("Trading Risk Manager")
         self.root.rowconfigure(0, weight=1)
         self.root.columnconfigure(0, weight=1)
+        self.make_menu()
         self.make_widgets()
         self.root.mainloop()
         
@@ -74,6 +75,28 @@ class MainGUI:
     
     def save_to_file(self):
         pass
+    
+    def information(self):
+        window = tkinter.Toplevel(self.root)
+        window.title("Information")
+        window.geometry("300x250")
+        window.resizable(0,0)
+        text = tkinter.Text(window, relief="sunken")
+        text.grid(row=0, column=0, sticky="nsew")
+        with open('info.txt') as file:
+            for info in file:
+                text.insert("end", info)
+                text.see("end")
+                text.update()
+        
+        
+    def make_menu(self):
+        top = tkinter.Menu(self.root)
+        self.root.config(menu=top)
+        file = tkinter.Menu(top)
+        file.add_command(label='Information', command=(lambda: self.information()), underline=0)
+        file.add_command(label='Quit', command=(lambda: self.root.destroy()), underline=0)
+        top.add_cascade(label='Menu', menu=file, underline=0)
         
 class MyLabel(tkinter.Label):
     def __init__(self, parent=None, **config):
