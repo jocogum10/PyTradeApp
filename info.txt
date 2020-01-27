@@ -1,0 +1,5 @@
+Application Information
+Written by: jocogum
+
+This is a risk management 
+calculator for stock trading.
