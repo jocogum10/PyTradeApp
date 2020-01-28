@@ -37,11 +37,10 @@ class MainGUI(tkinter.Frame):
         root.mainloop()
     
     def stock_search(self):
-        pass
-        #self.root.destroy()
-        #root = tkinter.Tk()
-        #window = StockSearchGUI(root)
-        #root.mainloop()
+        self.root.destroy()
+        root = tkinter.Tk()
+        window = StockSearchGUI(root)
+        root.mainloop()
 
 
 class StockSearchGUI(tkinter.Frame):
@@ -63,13 +62,80 @@ class StockSearchGUI(tkinter.Frame):
         file.add_command(label='Quit', command=(lambda: self.root.destroy()), underline=0)
         top.add_cascade(label='Menu', menu=file, underline=0)
         
+    def main_menu(self):
+        self.root.destroy()
+        root = tkinter.Tk()
+        window = MainGUI(root)
+        root.mainloop()
+        
     def make_widgets(self):
         my_frame = tkinter.Frame(self.root)
         my_frame.grid(row=0, column=0, sticky="nsew")
         # configure frame to be expandable
+        my_frame.columnconfigure(0, weight=1)
         my_frame.columnconfigure(1, weight=1)
         my_frame.rowconfigure(0, weight=1)
-        my_frame.rowconfigure(0, weight=1)
+        my_frame.rowconfigure(1, weight=1)
+        # row 0 widgets
+        self.button1 = MyButton(my_frame, text="View Stocks", command=(lambda: self.view_stocks()))
+        self.button1.grid(row=0, columnspan=2, sticky="nsew")
+        # row 1 widgets
+        MyLabel(my_frame, text="Filter Stocks").grid(row=1, columnspan=2, sticky="nsew")
+        # row 2 widgets
+        self.button2 = MyButton(my_frame, text="Filter Stock", command=(lambda: self.filter_cap()))
+        self.button2.grid(row=2, column=0, sticky="nsew")
+        self.entry1 = MyEntry(my_frame, 'micro, small, mid, big')
+        self.entry1.grid(row=2, column=1, sticky="nsew")
+    
+    def information(self):
+        window = tkinter.Toplevel(self.root)
+        window.title("Information")
+        window.columnconfigure(0, weight=1)
+        window.rowconfigure(0, weight=1) 
+        text = MyScrolledText(window, height=15, width=100)
+        text.grid(row=0, column=0, sticky="nsew")
+        with open('info.txt') as file:
+            for info in file:
+                text.write(info)
+                
+    def view_stocks(self):
+        window = tkinter.Toplevel(self.root)
+        window.title("Information")
+        window.columnconfigure(0, weight=1)
+        window.rowconfigure(0, weight=1) 
+        text = MyScrolledText(window,height=15, width=100)
+        text.grid(row=0, column=0, sticky="nsew")
+        with open('PH Stocks Financial Data.csv') as stock_list:
+            stock_dictionary = csv.DictReader(stock_list)
+            for stock in stock_dictionary:
+                text.write("\n{0:>7s} - {1}".format(stock['CODE'], stock['COMPANY NAME']))
+        
+    def filter_cap(self):
+        cap = self.entry1.get()
+        window = tkinter.Toplevel(self.root)
+        window.title("Information")
+        window.columnconfigure(0, weight=1)
+        window.rowconfigure(0, weight=1) 
+        text = MyScrolledText(window,height=15, width=100)
+        text.grid(row=0, column=0, sticky="nsew")
+        if cap == 'micro':
+            lower_val = 0
+            higher_val = 10000000000
+        elif cap == 'small':
+            lower_val = 10000000000
+            higher_val = 40000000000
+        elif cap == 'mid':
+            lower_val = 40000000000
+            higher_val = 100000000000
+        elif cap == 'big':
+            lower_val = 100000000000
+            higher_val = float('inf')
+    
+        with open('PH Stocks Financial Data.csv') as stock_list:
+            stock_dictionary = csv.DictReader(stock_list)
+            for stock in stock_dictionary:
+                if int(stock['MARKET CAPITALIZATION'].replace(',','')) < higher_val and int(stock['MARKET CAPITALIZATION'].replace(',','')) > lower_val:
+                    text.write("{0:>7s} - {1}".format(stock['CODE'], stock['COMPANY NAME']))
 
 
 class CalculatorGUI(tkinter.Frame):
@@ -184,10 +250,10 @@ class CalculatorGUI(tkinter.Frame):
     def information(self):
         window = tkinter.Toplevel(self.root)
         window.title("Information")
-        window.resizable(0,0)
-        text = MyText(window)
-        text.grid(row=0, column=0)
-        text.config(height=20, width=30)
+        window.columnconfigure(0, weight=1)
+        window.rowconfigure(0, weight=1) 
+        text = MyScrolledText(window, height=15, width=100)
+        text.grid(row=0, column=0, sticky="nsew")
         with open('info.txt') as file:
             for info in file:
                 text.write(info)
@@ -231,27 +297,33 @@ class MyText(tkinter.Text):
     def clear(self):
         self.delete("1.0", "end")
         self.update()
- 
- 
-def filter_cap(cap):
-    if cap == 'micro cap':
-        lower_val = 0
-        higher_val = 10000000000
-    elif cap == 'small cap':
-        lower_val = 10000000000
-        higher_val = 40000000000
-    elif cap == 'mid cap':
-        lower_val = 40000000000
-        higher_val = 100000000000
-    elif cap == 'big cap':
-        lower_val = 100000000000
-        higher_val = float('inf')
-    
-    with open('PH Stocks Financial Data.csv') as stock_list:
-        stock_dictionary = csv.DictReader(stock_list)
-        for stock in stock_dictionary:
-            if int(stock['MARKET CAPITALIZATION'].replace(',','')) < higher_val and int(stock['MARKET CAPITALIZATION'].replace(',','')) > lower_val:
-                print(stock['CODE'], stock['COMPANY NAME'])
+        
+class MyScrolledText(tkinter.Frame):
+    def __init__(self, parent=None, text='', height=0, width=0, **config):
+        tkinter.Frame.__init__(self, parent, **config)
+        self.grid(sticky="nsew")
+        sbar = tkinter.Scrollbar(self)
+        self.height = height
+        self.width = width
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        text = tkinter.Text(self, relief="sunken", height=self.height, width=self.width)
+        sbar.config(command=text.yview)
+        text.config(yscrollcommand=sbar.set)
+        sbar.grid(row=0, column=1, sticky="nsew")
+        text.grid(row=0, column=0, sticky="nsew")
+        text.rowconfigure(0, weight=1)
+        text.columnconfigure(0, weight=1)
+        self.text = text
+        
+    def write(self, text):
+        self.text.insert("end", str("\n"+text))
+        self.text.see("end")
+        self.text.update()
+        
+    def clear(self):
+        self.text.delete("1.0", "end")
+        self.text.update()
 
 
 if __name__ == '__main__':
