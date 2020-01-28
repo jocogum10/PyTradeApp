@@ -4,23 +4,89 @@ my trading app.
 # risk calculator
 # stock viewer
 """
+
 import csv, tkinter, math
-class MainGUI:
-    def __init__(self):
-        self.root = tkinter.Tk()
-        self.root.title("Trading Risk Manager")
+
+class MainGUI(tkinter.Frame):
+    def __init__(self, parent=None):
+        tkinter.Frame.__init__(self, parent)
+        self.root = parent
+        self.root.title("Trading Application")
         self.root.rowconfigure(0, weight=1)
         self.root.columnconfigure(0, weight=1)
         self.make_menu()
-        self.make_widgets()
-        self.root.mainloop()
+        
+    def make_menu(self):
+        my_frame = tkinter.Frame(self.root)
+        my_frame.grid(row=0, column=0, sticky="nsew")
+        # configure frame to be expandable
+        my_frame.columnconfigure(0, weight=1)
+        my_frame.rowconfigure(0, weight=1)
+        my_frame.rowconfigure(1, weight=1)
+        # widgets
+        self.button1 = MyButton(my_frame, text="Risk Management Calculator", command=(lambda:self.calculator()))
+        self.button2 = MyButton(my_frame, text="PH Stock Search", command=(lambda:self.stock_search()))
+        
+        self.button1.grid(row=0, column=0, sticky="nsew")
+        self.button2.grid(row=1, column=0, sticky="nsew")
+        
+    def calculator(self):
+        self.root.destroy()
+        root = tkinter.Tk()
+        window = CalculatorGUI(root)
+        root.mainloop()
+    
+    def stock_search(self):
+        pass
+        #self.root.destroy()
+        #root = tkinter.Tk()
+        #window = StockSearchGUI(root)
+        #root.mainloop()
+
+
+class StockSearchGUI(tkinter.Frame):
+    def __init__(self, parent=None):
+        tkinter.Frame.__init__(self, parent)
+        self.root = parent
+        self.root.title("Trading Calculator")
+        self.root.rowconfigure(0, weight=1)
+        self.root.columnconfigure(0, weight=1)
+        self.make_menu()        # building the menu
+        self.make_widgets()     # building the gui interface
+    
+    def make_menu(self):
+        top = tkinter.Menu(self.root)
+        self.root.config(menu=top)
+        file = tkinter.Menu(top)
+        file.add_command(label='Main Menu', command=(lambda: self.main_menu()), underline=0)
+        file.add_command(label='Information', command=(lambda: self.information()), underline=0)
+        file.add_command(label='Quit', command=(lambda: self.root.destroy()), underline=0)
+        top.add_cascade(label='Menu', menu=file, underline=0)
         
     def make_widgets(self):
         my_frame = tkinter.Frame(self.root)
         my_frame.grid(row=0, column=0, sticky="nsew")
-        
+        # configure frame to be expandable
         my_frame.columnconfigure(1, weight=1)
-        
+        my_frame.rowconfigure(0, weight=1)
+        my_frame.rowconfigure(0, weight=1)
+
+
+class CalculatorGUI(tkinter.Frame):
+    def __init__(self, parent=None):
+        tkinter.Frame.__init__(self, parent)
+        self.root = parent
+        self.root.title("Trading Calculator")
+        self.root.rowconfigure(0, weight=1)
+        self.root.columnconfigure(0, weight=1)
+        self.make_menu()        # building the menu
+        self.make_widgets()     # building the gui interface
+    
+    def make_widgets(self):
+        my_frame = tkinter.Frame(self.root)
+        my_frame.grid(row=0, column=0, sticky="nsew")
+        # configure frame to be expandable
+        my_frame.columnconfigure(1, weight=1)
         my_frame.rowconfigure(0, weight=1)
         my_frame.rowconfigure(1, weight=1)
         my_frame.rowconfigure(2, weight=1)
@@ -32,7 +98,7 @@ class MainGUI:
         my_frame.rowconfigure(8, weight=1)
         my_frame.rowconfigure(9, weight=1)
         my_frame.rowconfigure(10, weight=1)
-        
+        # column 0 widgets
         MyLabel(my_frame, text="Capital").grid(row=0, column=0, sticky="nsew")
         MyLabel(my_frame, text="Risk Percentage").grid(row=1, column=0, sticky="nsew")
         MyLabel(my_frame, text="Amount to Risk").grid(row=2, column=0, sticky="nsew")
@@ -43,7 +109,7 @@ class MainGUI:
         MyLabel(my_frame, text="Amount to Trade").grid(row=7, column=0, sticky="nsew")
         MyLabel(my_frame, text="No. of Shares to Buy").grid(row=8, column=0, sticky="nsew")
         MyLabel(my_frame, text="Capital Invested").grid(row=9, column=0, sticky="nsew")
-        
+        # column 1 widgets
         self.entry1 = MyEntry(my_frame, 'PHP 50,000.00')
         self.entry2 = MyEntry(my_frame, '1%', )
         self.entry3 = MyText(my_frame)
@@ -69,31 +135,46 @@ class MainGUI:
         self.entry8.grid(row=7, column=1, sticky="nsew")
         self.entry9.grid(row=8, column=1, sticky="nsew")
         self.entry10.grid(row=9, column=1, sticky="nsew")
-        
+        # bottom side widgets
         self.button1 = MyButton(my_frame, text="Calculate", command=self.calculate)
         self.button2 = MyButton(my_frame, text="Save to File", command=self.save_to_file)
         self.button1.grid(row=10, columnspan=2, sticky="nsew")
         self.button2.grid(row=11, columnspan=2, sticky="nsew")
     
+    def make_menu(self):
+        top = tkinter.Menu(self.root)
+        self.root.config(menu=top)
+        file = tkinter.Menu(top)
+        file.add_command(label='Main Menu', command=(lambda: self.main_menu()), underline=0)
+        file.add_command(label='Information', command=(lambda: self.information()), underline=0)
+        file.add_command(label='Quit', command=(lambda: self.root.destroy()), underline=0)
+        top.add_cascade(label='Menu', menu=file, underline=0)
+    
+    def main_menu(self):
+        self.root.destroy()
+        root = tkinter.Tk()
+        window = MainGUI(root)
+        root.mainloop()
+    
     def calculate(self):
+        # data formatting
         capital = float(self.entry1.get().replace('PHP', '').replace(',',''))
         percentage = float(self.entry2.get().replace('%',''))/100.00
-        amount_to_risk = capital * percentage
-        self.entry3.clear()
-        self.entry3.write("PHP {0:,.2f}".format(amount_to_risk))
-        
         cut_loss_percentage = float(self.entry5.get().replace('%',''))/100.00
-        amount_to_trade = amount_to_risk / cut_loss_percentage
-        self.entry8.clear()
-        self.entry8.write("PHP {0:,.2f}".format(amount_to_trade))
-        
         entry_price = float(self.entry6.get())
         board_lot = int(self.entry7.get())
+        # data calculation
+        amount_to_risk = capital * percentage
+        amount_to_trade = amount_to_risk / cut_loss_percentage
         shares_to_buy = math.floor((amount_to_trade / entry_price)/board_lot)*board_lot
+        capital_invested = shares_to_buy * entry_price
+        # data printing
+        self.entry3.clear()
+        self.entry3.write("PHP {0:,.2f}".format(amount_to_risk))
+        self.entry8.clear()
+        self.entry8.write("PHP {0:,.2f}".format(amount_to_trade))
         self.entry9.clear()
         self.entry9.write("{0:,}".format(shares_to_buy))
-        
-        capital_invested = shares_to_buy * entry_price
         self.entry10.clear()
         self.entry10.write("{0:,.2f}".format(capital_invested))
     
@@ -110,28 +191,22 @@ class MainGUI:
         with open('info.txt') as file:
             for info in file:
                 text.write(info)
-        
-        
-    def make_menu(self):
-        top = tkinter.Menu(self.root)
-        self.root.config(menu=top)
-        file = tkinter.Menu(top)
-        file.add_command(label='Information', command=(lambda: self.information()), underline=0)
-        file.add_command(label='Quit', command=(lambda: self.root.destroy()), underline=0)
-        top.add_cascade(label='Menu', menu=file, underline=0)
-        
+  
+  
 class MyLabel(tkinter.Label):
     def __init__(self, parent=None, **config):
         tkinter.Label.__init__(self, parent, **config)
         self.grid(sticky="nsew")
         self.config(font=("courier", 10, "bold"))
-        
+  
+  
 class MyButton(tkinter.Button):
     def __init__(self, parent=None, **config):
         tkinter.Button.__init__(self, parent, **config)
         self.grid(sticky="nsew", padx=10, pady=10)
         self.config(bg="steel blue")
         self.config(font=("courier", 10, "bold"))
+  
     
 class MyEntry(tkinter.Entry):
     def __init__(self, parent=None, label='', **config):
@@ -140,7 +215,8 @@ class MyEntry(tkinter.Entry):
         self.insert(0, label)
         self.config(font=("courier", 10, "italic"))
         self.config(bg="light steel blue")
-            
+
+  
 class MyText(tkinter.Text):
     def __init__(self, parent=None, **config):
         tkinter.Text.__init__(self, parent, **config)
@@ -155,8 +231,8 @@ class MyText(tkinter.Text):
     def clear(self):
         self.delete("1.0", "end")
         self.update()
-           
-           
+ 
+ 
 def filter_cap(cap):
     if cap == 'micro cap':
         lower_val = 0
@@ -176,7 +252,9 @@ def filter_cap(cap):
         for stock in stock_dictionary:
             if int(stock['MARKET CAPITALIZATION'].replace(',','')) < higher_val and int(stock['MARKET CAPITALIZATION'].replace(',','')) > lower_val:
                 print(stock['CODE'], stock['COMPANY NAME'])
-                
-            
+
+
 if __name__ == '__main__':
-    MainGUI()
+    root = tkinter.Tk()
+    window = MainGUI(root)
+    root.mainloop()
