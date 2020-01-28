@@ -1,8 +1,11 @@
 """
-my trading app.
+PyTradeApp - my trading application which has a risk management calculator and
+            a PH stock viewer and filter using a provided CSV file.
 
 # risk calculator
 # stock viewer
+
+CSV file source: reddit.com /r/phinvest: PH Stocks Financial Data.csv
 """
 
 import csv, tkinter, math
